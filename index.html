@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Routing...</title>
+    <script>
+        // Set the fallback standard URL
+        var webUrl = "https://www.facebook.com/GoldenPizzaOfficial";
+        
+        // Set the Facebook App URI scheme (Forces App open)
+        var appUrl = "fb://facewebmodal/f?href=https://www.facebook.com/GoldenPizzaOfficial";
+
+        // Fallback execution if App fails to open within 2 seconds
+        setTimeout(function () {
+            window.location.href = webUrl;
+        }, 2000);
+
+        // Immediate attempt to launch the App
+        window.location.href = appUrl;
+    </script>
+</head>
+<body style="font-family: Arial, sans-serif; text-align: center; padding-top: 50px;">
+    <p>Opening Golden Pizza...</p>
+    <p>If not redirected automatically, <a href="https://www.facebook.com/GoldenPizzaOfficial">click here</a>.</p>
+</body>
+</html>
