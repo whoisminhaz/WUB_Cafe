@@ -1,41 +1,339 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Golden Pizza</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding-top: 20%; background-color: #f0f2f5; }
-        .btn { 
-            display: inline-block; 
-            padding: 15px 30px; 
-            font-size: 18px; 
-            color: white; 
-            background-color: #0866ff; 
-            text-decoration: none; 
-            border-radius: 8px; 
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .fallback { margin-top: 20px; font-size: 14px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>WUB Kitchen Ordering</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #e63946; /* Premium Crimson Red */
+    --primary-dark: #b71c1c;
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --text: #1d3557;
+    --text-muted: #6c757d;
+    --accent: #457b9d;
+  }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  /* --- Language Screen --- */
+  #lang-screen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  }
+  .logo-placeholder {
+    width: 120px; height: 120px;
+    background: var(--primary); border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    color: white; font-size: 32px; font-weight: bold; margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(230, 57, 70, 0.3);
+  }
+  .lang-btn {
+    background: var(--card); color: var(--text);
+    border: 2px solid var(--primary); padding: 15px 40px;
+    font-size: 18px; border-radius: 30px; margin: 10px;
+    cursor: pointer; width: 220px; font-weight: 600;
+    transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+  .lang-btn:active { transform: translateY(2px); }
+  
+  /* --- Main Menu Screen --- */
+  #menu-screen { display: none; padding: 20px; padding-bottom: 120px; max-width: 600px; margin: 0 auto; }
+  .header { text-align: center; margin-bottom: 30px; }
+  .header h2 { margin: 0 0 10px 0; font-weight: 700; color: var(--text); }
+  .table-badge {
+    background: var(--primary); color: white; padding: 6px 16px;
+    border-radius: 20px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px;
+  }
+  
+  .menu-item {
+    background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex;
+    justify-content: space-between; align-items: center; border: 1px solid #eaeaea;
+  }
+  .item-info h3 { margin: 0 0 4px 0; font-size: 17px; font-weight: 600; }
+  .item-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .item-price { font-weight: 700; color: var(--primary); font-size: 16px; }
+  
+  .qty-controls { display: flex; align-items: center; gap: 12px; background: #f8f9fa; padding: 5px; border-radius: 30px; }
+  .qty-btn {
+    background: var(--card); border: 1px solid #ddd; width: 32px; height: 32px;
+    border-radius: 50%; font-size: 18px; cursor: pointer; display: flex;
+    justify-content: center; align-items: center; font-weight: 600; color: var(--text);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  
+  /* --- Cart Bar --- */
+  #cart-bar {
+    position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card);
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.08); padding: 20px; box-sizing: border-box;
+    display: none; justify-content: space-between; align-items: center; z-index: 10;
+  }
+  .cart-info { display: flex; flex-direction: column; }
+  .cart-total { font-weight: 700; font-size: 20px; color: var(--text); }
+  .cart-items { font-size: 13px; color: var(--text-muted); }
+  .checkout-btn {
+    background: var(--primary); color: white; border: none; padding: 14px 28px;
+    border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 15px rgba(230, 57, 70, 0.4);
+  }
+
+  /* --- Checkout Modal --- */
+  #checkout-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); display: none; justify-content: center;
+    align-items: flex-end; z-index: 20; backdrop-filter: blur(4px);
+  }
+  .modal-content {
+    background: var(--card); width: 100%; max-width: 600px; padding: 30px 20px;
+    border-radius: 24px 24px 0 0; box-sizing: border-box; animation: slideUp 0.3s ease-out;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  
+  .input-field {
+    width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px;
+    font-size: 16px; font-family: 'Poppins', sans-serif; box-sizing: border-box; margin-bottom: 20px;
+  }
+  .payment-options { display: flex; gap: 10px; margin-bottom: 20px; }
+  .pay-btn {
+    flex: 1; padding: 12px; border: 2px solid #ddd; background: transparent;
+    border-radius: 12px; font-weight: 600; cursor: pointer; color: var(--text-muted);
+  }
+  .pay-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(230,57,70,0.05); }
+  
+  #bkash-qr { display: none; text-align: center; margin-bottom: 20px; }
+  #bkash-qr img { width: 180px; height: 180px; border-radius: 12px; border: 1px solid #ddd; padding: 5px; }
+  
+  .confirm-btn {
+    width: 100%; background: var(--text); color: white; padding: 16px;
+    border: none; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer;
+  }
+  .close-modal { text-align: center; margin-top: 15px; color: var(--text-muted); font-size: 14px; cursor: pointer; text-decoration: underline; }
+</style>
 </head>
 <body>
-    <h2>Continue to Golden Pizza</h2>
-    
-    <a href="#" class="btn" onclick="openApp()">Open in Facebook App</a>
 
-    <div class="fallback">
-        <p>Or <a href="https://www.facebook.com/GoldenPizzaOfficial">continue in browser</a>.</p>
+<div id="lang-screen">
+  <div class="logo-placeholder">WUB</div>
+  <h2 style="margin-bottom: 30px; font-weight: 600;">Welcome to Kitchen</h2>
+  <button class="lang-btn" onclick="selectLanguage('en')">English</button>
+  <button class="lang-btn" onclick="selectLanguage('bn')">বাংলা</button>
+</div>
+
+<div id="menu-screen">
+  <div class="header">
+    <h2 id="menu-title">WUB Kitchen</h2>
+    <span class="table-badge" id="table-display">Table: --</span>
+  </div>
+  <div id="menu-container"></div>
+</div>
+
+<div id="cart-bar">
+  <div class="cart-info">
+    <span class="cart-total" id="cart-total">৳0</span>
+    <span class="cart-items" id="cart-items">0 items</span>
+  </div>
+  <button class="checkout-btn" id="checkout-start-btn" onclick="openCheckout()">Checkout</button>
+</div>
+
+<div id="checkout-modal">
+  <div class="modal-content">
+    <h3 style="margin-top:0;" id="modal-title">Complete Order</h3>
+    
+    <input type="text" id="customer-name" class="input-field" placeholder="Your Name" required>
+    
+    <div class="payment-options">
+      <button class="pay-btn active" id="btn-cash" onclick="selectPayment('Cash')">Counter Pay</button>
+      <button class="pay-btn" id="btn-bkash" onclick="selectPayment('bKash')">bKash</button>
+    </div>
+    
+    <div id="bkash-qr">
+      <p style="font-size: 13px; margin: 0 0 10px 0;">Scan to Pay. Use order name as reference.</p>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=BkashNumberHere" alt="bKash QR">
     </div>
 
-    <script>
-        function openApp() {
-            // Android/General URI Scheme
-            var appUrl = "fb://facewebmodal/f?href=https://www.facebook.com/GoldenPizzaOfficial";
-            
-            // Execute launch
-            window.location.replace(appUrl);
-        }
-    </script>
+    <button class="confirm-btn" id="confirm-order-btn" onclick="placeOrder()">Confirm Order</button>
+    <div class="close-modal" onclick="closeCheckout()">Cancel</div>
+  </div>
+</div>
+
+<script>
+  // --- 1. CONFIGURATION ---
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxnAHiQ_t5W964uxw05w3XCLX16Z8l9JtsSlElnLzRs7PtbSX1jo9dSAjvhJ6SeUNih/exec"; 
+  
+  // --- 2. MENU DATA (Based on Video Items) ---
+  const menuData = [
+    { id: "m1", price: 60, en: { name: "Hot Dog", desc: "Freshly baked chicken hot dog" }, bn: { name: "হট ডগ", desc: "টাটকা বেকড চিকেন হট ডগ" } },
+    { id: "m2", price: 55, en: { name: "Chicken Burger", desc: "Classic bun with chicken patty" }, bn: { name: "চিকেন বার্গার", desc: "চিকেন প্যাটি সহ ক্লাসিক বান" } },
+    { id: "m3", price: 40, en: { name: "Mini Pizza", desc: "Cheesy chicken slice" }, bn: { name: "মিনি পিজ্জা", desc: "চিজ এবং চিকেন স্লাইস" } },
+    { id: "m4", price: 30, en: { name: "Vegetable Roll", desc: "Crispy fried vegetable wrap" }, bn: { name: "ভেজিটেবল রোল", desc: "মচমচে ভাজা সবজির রোল" } },
+    { id: "m5", price: 120, en: { name: "Fried Rice Combo", desc: "Fried rice with chicken & salad" }, bn: { name: "ফ্রাইড রাইস কম্বো", desc: "চিকেন ও সালাদ সহ ফ্রাইড রাইস" } },
+    { id: "m6", price: 30, en: { name: "Dan Cake / Muffin", desc: "Sweet bakery treats" }, bn: { name: "ড্যান কেক / মাফিন", desc: "মিষ্টি বেকারি আইটেম" } },
+    { id: "m7", price: 20, en: { name: "Kurkure / Lays", desc: "Assorted chips" }, bn: { name: "কুরকুরে / লেইস", desc: "বিভিন্ন ধরনের চিপস" } },
+    { id: "m8", price: 20, en: { name: "Hot Coffee / Tea", desc: "Freshly brewed hot beverage" }, bn: { name: "গরম কফি / চা", desc: "টাটকা গরম পানীয়" } },
+    { id: "m9", price: 30, en: { name: "Cold Drinks", desc: "Coca-Cola, Pepsi, Sprite" }, bn: { name: "কোল্ড ড্রিংকস", desc: "কোকাকোলা, পেপসি, স্প্রাইট" } }
+  ];
+
+  // --- 3. SYSTEM LOGIC ---
+  let currentLang = 'en';
+  let cart = {};
+  let tableNumber = "Takeaway";
+  let selectedPayment = "Cash";
+
+  window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+    if(params.has('table')) tableNumber = params.get('table');
+  };
+
+  function selectLanguage(lang) {
+    currentLang = lang;
+    document.getElementById('lang-screen').style.display = 'none';
+    document.getElementById('menu-screen').style.display = 'block';
+    
+    document.getElementById('table-display').innerText = lang === 'en' ? `Table: ${tableNumber}` : `টেবিল: ${tableNumber}`;
+    document.getElementById('checkout-start-btn').innerText = lang === 'en' ? 'Checkout' : 'চেকআউট';
+    document.getElementById('modal-title').innerText = lang === 'en' ? 'Complete Order' : 'অর্ডার সম্পন্ন করুন';
+    document.getElementById('customer-name').placeholder = lang === 'en' ? 'Your Name' : 'আপনার নাম';
+    document.getElementById('btn-cash').innerText = lang === 'en' ? 'Counter Pay' : 'কাউন্টারে দিন';
+    document.getElementById('confirm-order-btn').innerText = lang === 'en' ? 'Confirm Order' : 'অর্ডার কনফার্ম করুন';
+    
+    renderMenu();
+  }
+
+  function renderMenu() {
+    const container = document.getElementById('menu-container');
+    container.innerHTML = '';
+    
+    menuData.forEach(item => {
+      const qty = cart[item.id] || 0;
+      const langData = item[currentLang];
+      
+      container.innerHTML += `
+        <div class="menu-item">
+          <div class="item-info">
+            <h3>${langData.name}</h3>
+            <div class="item-desc">${langData.desc}</div>
+            <div class="item-price">৳${item.price}</div>
+          </div>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="updateCart('${item.id}', -1)">-</button>
+            <span style="font-weight:bold; width:20px; text-align:center; color: var(--text);">${qty}</span>
+            <button class="qty-btn" onclick="updateCart('${item.id}', 1)">+</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function updateCart(id, change) {
+    if(!cart[id]) cart[id] = 0;
+    cart[id] += change;
+    if(cart[id] < 0) cart[id] = 0;
+    renderMenu();
+    updateCartUI();
+  }
+
+  function updateCartUI() {
+    let totalItems = 0;
+    let totalPrice = 0;
+    
+    menuData.forEach(item => {
+      const qty = cart[item.id] || 0;
+      totalItems += qty;
+      totalPrice += (qty * item.price);
+    });
+    
+    const cartBar = document.getElementById('cart-bar');
+    if(totalItems > 0) {
+      cartBar.style.display = 'flex';
+      document.getElementById('cart-total').innerText = `৳${totalPrice}`;
+      document.getElementById('cart-items').innerText = `${totalItems} ${currentLang === 'en' ? 'items' : 'আইটেম'}`;
+    } else {
+      cartBar.style.display = 'none';
+    }
+  }
+
+  function openCheckout() { document.getElementById('checkout-modal').style.display = 'flex'; }
+  function closeCheckout() { document.getElementById('checkout-modal').style.display = 'none'; }
+
+  function selectPayment(method) {
+    selectedPayment = method;
+    document.getElementById('btn-cash').classList.remove('active');
+    document.getElementById('btn-bkash').classList.remove('active');
+    
+    if(method === 'Cash') {
+      document.getElementById('btn-cash').classList.add('active');
+      document.getElementById('bkash-qr').style.display = 'none';
+    } else {
+      document.getElementById('btn-bkash').classList.add('active');
+      document.getElementById('bkash-qr').style.display = 'block';
+    }
+  }
+
+  function placeOrder() {
+    const nameInput = document.getElementById('customer-name').value.trim();
+    if(!nameInput) {
+      alert(currentLang === 'en' ? "Please enter your name." : "অনুগ্রহ করে আপনার নাম লিখুন।");
+      return;
+    }
+
+    const btn = document.getElementById('confirm-order-btn');
+    btn.innerText = currentLang === 'en' ? 'Processing...' : 'প্রসেস হচ্ছে...';
+    btn.disabled = true;
+
+    let orderItems = [];
+    let totalPrice = 0;
+    menuData.forEach(item => {
+      const qty = cart[item.id];
+      if(qty > 0) {
+        orderItems.push(`${qty}x ${item.en.name}`);
+        totalPrice += (qty * item.price);
+      }
+    });
+
+    const payload = {
+      table: tableNumber,
+      customerName: nameInput,
+      paymentMethod: selectedPayment,
+      items: orderItems.join(", "),
+      total: totalPrice,
+      language: currentLang
+    };
+
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(() => {
+      document.body.innerHTML = `
+        <div style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:var(--bg); text-align:center; padding: 20px;">
+          <div style="font-size:60px; margin-bottom:10px;">✅</div>
+          <h2 style="color:var(--text);">${currentLang === 'en' ? 'Order Confirmed!' : 'অর্ডার সফল হয়েছে!'}</h2>
+          <p style="color:var(--text-muted);">${currentLang === 'en' ? `Thank you, ${nameInput}. Your food is being prepared.` : `ধন্যবাদ, ${nameInput}। আপনার খাবার প্রস্তুত করা হচ্ছে।`}</p>
+          <div style="margin-top:20px; padding:15px; background:white; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05); font-weight:bold;">
+            ${currentLang === 'en' ? 'Payment:' : 'পেমেন্ট:'} ${selectedPayment}
+          </div>
+        </div>
+      `;
+    }).catch(err => {
+      alert("Network Error. Please try again.");
+      btn.innerText = currentLang === 'en' ? 'Confirm Order' : 'অর্ডার কনফার্ম করুন';
+      btn.disabled = false;
+    });
+  }
+</script>
 </body>
 </html>
